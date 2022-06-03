@@ -14,10 +14,12 @@ namespace Ganho_Capital.Services
         private List<string> lstTaxasCalc;
 
         private readonly ICalculo _calculo;
+        private readonly IConsoleIO _console;
 
-        public Processamento(ICalculo calculo)
+        public Processamento(ICalculo calculo, IConsoleIO console)
         {
             _calculo = calculo;
+            _console = console;
         }
 
         public void Iniciar(string[] args)
@@ -29,7 +31,7 @@ namespace Ganho_Capital.Services
 
             try
             {
-                while (!string.IsNullOrEmpty(line = Console.ReadLine()))
+                while (!string.IsNullOrEmpty(line = _console.ReadLine()))
                 {
                     lstJsonEntrada.Add(line);
                 }
@@ -45,7 +47,7 @@ namespace Ganho_Capital.Services
             }
             catch (Exception ex)
             {
-                Console.Write($"\nErro ao processar o JSON de entrada: {ex.Message}");
+                _console.Write($"\nErro ao processar o JSON de entrada: {ex.Message}");
             }
         }
 
@@ -68,7 +70,7 @@ namespace Ganho_Capital.Services
 
             foreach (var item in lstTaxasCalc)
             {
-                Console.Write($"{item}\n");
+                _console.Write($"{item}\n");
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using Ganho_Capital.Interfaces;
+﻿using Ganho_Capital.Helpers;
+using Ganho_Capital.Interfaces;
 using Ganho_Capital.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics.CodeAnalysis;
@@ -13,6 +14,7 @@ namespace Ganho_Capital
             var serviceProvide = new ServiceCollection()
                 .AddSingleton<IProcessamento, Processamento>()
                 .AddTransient<ICalculo, Calculo>()
+                .AddTransient<IConsoleIO, ConsoleIO>()
                 .BuildServiceProvider();
 
             var processamento = serviceProvide.GetService<IProcessamento>();

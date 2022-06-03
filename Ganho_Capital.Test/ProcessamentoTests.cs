@@ -1,35 +1,44 @@
 using Ganho_Capital.Interfaces;
 using Ganho_Capital.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.IO;
+using Moq;
+using Moq.AutoMock;
 
 namespace Ganho_Capital.Test
 {
     [TestClass]
     public class ProcessamentoTests
     {
+        private AutoMocker mocker;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            mocker = new AutoMocker();
+
+            mocker.Use(new Mock<ICalculo>());
+            mocker.Use(new Mock<IConsoleIO>());
+        }
+
         [TestMethod]
         [Description("Operações realizadas com sucesso")]
         public void ProcessamentoRealizado()
         {
             //arrange
             string jsonEntrada = "[{\"operation\":\"buy\", \"unit-cost\":10.00, \"quantity\": 10000},{\"operation\":\"sell\", \"unit-cost\":20.00, \"quantity\": 5000}]";
-            IProcessamento processamento = new Processamento(new Calculo());
 
-            var stringWriter = new StringWriter();
-            Console.SetOut(stringWriter);
+            mocker.GetMock<IConsoleIO>()
+                .SetupSequence(x => x.ReadLine())
+                .Returns(jsonEntrada)
+                .Returns("\n");
 
-            var stringReader = new StringReader(jsonEntrada);
-            Console.SetIn(stringReader);
+            var processamento = mocker.CreateInstance<Processamento>();
 
             //act
             processamento.Iniciar(null);
 
             //assert
-            var output = stringWriter.ToString();
-            string vlrEsperado = "[{\"tax\":0.00},{\"tax\":10000.00}]\n";
-            Assert.AreEqual(vlrEsperado, output);
+            mocker.GetMock<IConsoleIO>().Verify(x => x.Write(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -38,21 +47,19 @@ namespace Ganho_Capital.Test
         {
             //arrange
             string jsonEntrada = "[{\"operation\":\"buy\", \"unit-cost\":10.00, \"quantity\": 10000},{\"operation\":\"sell\", \"unit-cost\":20.00, \"quantity\": 5000}";
-            IProcessamento processamento = new Processamento(new Calculo());
 
-            var stringWriter = new StringWriter();
-            Console.SetOut(stringWriter);
+            mocker.GetMock<IConsoleIO>()
+                .SetupSequence(x => x.ReadLine())
+                .Returns(jsonEntrada)
+                .Returns("\n");
 
-            var stringReader = new StringReader(jsonEntrada);
-            Console.SetIn(stringReader);
+            var processamento = mocker.CreateInstance<Processamento>();
 
             //act
             processamento.Iniciar(null);
 
             //assert
-            var output = stringWriter.ToString();
-            string vlrEsperado = "\nErro ao processar o JSON de entrada: Unexpected end when deserializing array. Path '[1]', line 1, position 116.";
-            Assert.AreEqual(vlrEsperado, output);
+            mocker.GetMock<IConsoleIO>().Verify(x => x.Write(It.IsAny<string>()), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -62,21 +69,19 @@ namespace Ganho_Capital.Test
             //arrange
             string jsonEntrada = "[{\"operation\":\"buy\", \"unit-cost\":10.00, \"quantity\": 10000},{\"operation\":\"sell\", \"unit-cost\":20.00, \"quantity\": 5000}]\n" +
                 "[{\"operation\":\"buy\", \"unit-cost\":10.00, \"quantity\": 10000},{\"operation\":\"sell\", \"unit-cost\":20.00, \"quantity\": 5000}]";
-            IProcessamento processamento = new Processamento(new Calculo());
 
-            var stringWriter = new StringWriter();
-            Console.SetOut(stringWriter);
+            mocker.GetMock<IConsoleIO>()
+                .SetupSequence(x => x.ReadLine())
+                .Returns(jsonEntrada)
+                .Returns("\n");
 
-            var stringReader = new StringReader(jsonEntrada);
-            Console.SetIn(stringReader);
+            var processamento = mocker.CreateInstance<Processamento>();
 
             //act
             processamento.Iniciar(null);
 
             //assert
-            var output = stringWriter.ToString();
-            string vlrEsperado = "[{\"tax\":0.00},{\"tax\":10000.00}]\n[{\"tax\":0.00},{\"tax\":10000.00}]\n";
-            Assert.AreEqual(vlrEsperado, output);
+            mocker.GetMock<IConsoleIO>().Verify(x => x.Write(It.IsAny<string>()), Times.Exactly(1));
         }
 
         [TestMethod]
@@ -89,21 +94,19 @@ namespace Ganho_Capital.Test
                 "{\"operation\":\"sell\",\"unit-cost\":25.00,\"quantity\":1000},{\"operation\":\"buy\",\"unit-cost\":20.00,\"quantity\":10000}," +
                 "{\"operation\":\"sell\",\"unit-cost\":15.00,\"quantity\":5000},{\"operation\":\"sell\",\"unit-cost\":30.00,\"quantity\":4350}," +
                 "{\"operation\":\"sell\",\"unit-cost\":30.00,\"quantity\":650}]";
-            IProcessamento processamento = new Processamento(new Calculo());
 
-            var stringWriter = new StringWriter();
-            Console.SetOut(stringWriter);
+            mocker.GetMock<IConsoleIO>()
+                .SetupSequence(x => x.ReadLine())
+                .Returns(jsonEntrada)
+                .Returns("\n");
 
-            var stringReader = new StringReader(jsonEntrada);
-            Console.SetIn(stringReader);
+            var processamento = mocker.CreateInstance<Processamento>();
 
             //act
             processamento.Iniciar(null);
 
             //assert
-            var output = stringWriter.ToString();
-            string vlrEsperado = "[{\"tax\":0.00},{\"tax\":0.00},{\"tax\":0.00},{\"tax\":0.00},{\"tax\":3000.00},{\"tax\":0.00},{\"tax\":0.00},{\"tax\":3700.00},{\"tax\":0.00}]\n";
-            Assert.AreEqual(vlrEsperado, output);
+            mocker.GetMock<IConsoleIO>().Verify(x => x.Write(It.IsAny<string>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -113,21 +116,19 @@ namespace Ganho_Capital.Test
             //arrange
             string jsonEntrada = "[{\"operation\":\"buy\", \"unit-cost\":10.00, \"quantity\": 10000},{\"operation\":\"sell\", \"unit-cost\":20.00, \"quantity\": 5000}]" +
                 "[{\"operation\":\"buy\", \"unit-cost\":10.00, \"quantity\": 10000},{\"operation\":\"sell\", \"unit-cost\":20.00, \"quantity\": 5000}";
-            IProcessamento processamento = new Processamento(new Calculo());
+            
+            mocker.GetMock<IConsoleIO>()
+                .SetupSequence(x => x.ReadLine())
+                .Returns(jsonEntrada)
+                .Returns("\n");
 
-            var stringWriter = new StringWriter();
-            Console.SetOut(stringWriter);
-
-            var stringReader = new StringReader(jsonEntrada);
-            Console.SetIn(stringReader);
+            var processamento = mocker.CreateInstance<Processamento>();
 
             //act
             processamento.Iniciar(null);
 
             //assert
-            var output = stringWriter.ToString();
-            string vlrEsperado = "\nErro ao processar o JSON de entrada: Additional text encountered after finished reading JSON content: [. Path '', line 1, position 117.";
-            Assert.AreEqual(vlrEsperado, output);
+            mocker.GetMock<IConsoleIO>().Verify(x => x.Write(It.IsAny<string>()), Times.Exactly(1));
         }
     }
 }
