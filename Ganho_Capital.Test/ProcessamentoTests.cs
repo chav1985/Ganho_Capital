@@ -15,8 +15,6 @@ namespace Ganho_Capital.Test
         public void Setup()
         {
             mocker = new AutoMocker();
-
-            mocker.Use(new Mock<ICalculo>());
             mocker.Use(new Mock<IConsoleIO>());
         }
 
@@ -116,7 +114,7 @@ namespace Ganho_Capital.Test
             //arrange
             string jsonEntrada = "[{\"operation\":\"buy\", \"unit-cost\":10.00, \"quantity\": 10000},{\"operation\":\"sell\", \"unit-cost\":20.00, \"quantity\": 5000}]" +
                 "[{\"operation\":\"buy\", \"unit-cost\":10.00, \"quantity\": 10000},{\"operation\":\"sell\", \"unit-cost\":20.00, \"quantity\": 5000}";
-            
+
             mocker.GetMock<IConsoleIO>()
                 .SetupSequence(x => x.ReadLine())
                 .Returns(jsonEntrada)
